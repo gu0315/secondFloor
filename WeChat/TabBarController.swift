@@ -20,7 +20,6 @@ class TabBarController: UITabBarController, ShowTabBarDelegate {
         let homeVC = ViewController()
         homeVC.delegate = self
         self.viewControllers = [UINavigationController.init(rootViewController: homeVC), UIViewController(), UIViewController(), UIViewController()]
-        // Do any additional setup after loading the view.
         self.viewControllers![0].tabBarItem.title = "微信"
     }
     
