@@ -101,17 +101,22 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
 extension ViewController: UIScrollViewDelegate, TopHeaderViewDidScrollDelegate {
     
     func topHeaderViewDidScroll(_ scrollView: UIScrollView) {
-        let offsetY = scrollView.contentOffset.y
-        let actualOffsetY = offsetY + UIDevice.xp_navigationFullHeight()
-        if (actualOffsetY > UIDevice.xp_navigationFullHeight() + 40) {
+        if (!m_isShowTableHeaderTopView) { return }
+        let offset = scrollView.contentOffset
+        let bounds = scrollView.bounds
+        let size = scrollView.contentSize
+        let inset = scrollView.contentInset
+        let currentOffset = offset.y + bounds.size.height - inset.bottom
+        let maximumOffset = size.height > bounds.height ? size.height : bounds.height
+        if (currentOffset >= maximumOffset + 44 && !scrollView.isTracking) {
             print("回到一楼")
+            self.m_isShowTableHeaderTopView = false
             if (self.delegate != nil) {
                 self.delegate?.showTabBar()
             }
             // 回到一楼
             UIView.animate(withDuration: 0.3) {
                 self.headerView.collectionView.isScrollEnabled = false
-                self.m_isShowTableHeaderTopView = false
                 self.tableView.scrollsToTop = true
                 self.navigationBar.y = UIDevice.xp_statusBarHeight()
                 self.navigationBar.setTopFream()

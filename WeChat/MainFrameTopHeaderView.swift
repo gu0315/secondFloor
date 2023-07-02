@@ -80,7 +80,7 @@ extension MainFrameTopHeaderView: UICollectionViewDelegate {
 
 extension MainFrameTopHeaderView: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 12
+        return 120
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
