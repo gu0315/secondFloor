@@ -96,6 +96,7 @@ class SecondFloorView: UIView {
     }
     
     fileprivate func configureView() {
+        
         self.addSubview(self.contentView)
         self.addSubview(self.navigationBar)
         
@@ -111,8 +112,8 @@ class SecondFloorView: UIView {
             self.contentView.addSubview(lab)
             contentHeight = contentHeight + 50
         }
-        
-        self.contentView.contentSize = CGSize(width: width, height: contentHeight + height + 100)
+        self.contentView.contentInset = .init(top: 0, left: 0, bottom: 0, right: 0)
+        self.contentView.contentSize = CGSize(width: width, height: contentHeight + height)
     }
     
 }
@@ -125,3 +126,4 @@ extension SecondFloorView: UIScrollViewDelegate {
         }
     }
 }
+

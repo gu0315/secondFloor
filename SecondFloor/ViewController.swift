@@ -9,18 +9,23 @@ import UIKit
 import Foundation
 import AudioToolbox
 
+
+@objc(ViewController)
 class ViewController: UIViewController {
     
     let width = UIScreen.main.bounds.width
     
     let height = UIScreen.main.bounds.height
     
+    
     /// 下拉刷新阈值
-    let pullTriggerThreshold: Double = 100
+    let pullTriggerThreshold: Double = 5
+    /// 配图消失阈值
+    let imageFadeOutThreshold: Double = 20
     /// 松手刷新阈值
-    let refreshThreshold: Double = 160
+    let refreshThreshold: Double = 60
     /// 二楼阈值
-    let secondFloorhreshold: Double = 220
+    let secondFloorhreshold: Double = 140
    
     /// 是否在执行动画
     fileprivate var doAnimation: Bool = false {
@@ -35,7 +40,7 @@ class ViewController: UIViewController {
     
     /// 刷新控件
     lazy var refreshView: RefreshView = {
-        let view = RefreshView(frame: .init(x: 0, y: 0, width: 200, height: 44))
+        let view = RefreshView(frame: .init(x: 0, y: 0, width: 200, height: 49))
         view.centerX = self.tableView.centerX
         view.isHidden = true
         return view
@@ -57,7 +62,6 @@ class ViewController: UIViewController {
         return view
     }()
     
-    
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -71,10 +75,7 @@ class ViewController: UIViewController {
         self.tableView.delegate = self
         self.tableView.dataSource = self
         self.tableView.reloadData()
-        
-        
         self.shakeViewUpDown(self.tableView)
-       
         self.secondFoorView.navigationBar.tapActionHandler = { [weak self] in
             self?.anmationToFirstFloor()
         }
@@ -87,14 +88,12 @@ class ViewController: UIViewController {
         self.view.bringSubviewToFront(self.tableView)
         self.tableView.addSubview(self.refreshView)
         self.view.backgroundColor = self.mainBgColor
-        
-    
     }
     
     
     func shakeViewUpDown(_ view: UIView) {
         let animation = CAKeyframeAnimation(keyPath: "transform.translation.y")
-        animation.values = [-9, 9, -7, 7, -5, 5, -4, 4, -2, 2, 0]
+        animation.values = [-10, 10, -6, 6, -2, 2, 0]
         animation.duration = 1
         animation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
         view.layer.add(animation, forKey: "shake")
@@ -112,6 +111,7 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
         cell.textLabel?.text = "Row \(indexPath.row)"
+        cell.backgroundColor = .red
         return cell
     }
 }
@@ -124,31 +124,31 @@ extension ViewController: UIScrollViewDelegate {
             return
         }
         let y = scrollView.contentOffset.y
-        // TODO 导航栏的控制
-        
         if y < 0 {
             // 滑动距离
             let scrollDistance = abs(y)
-            // 忽略多少距离后才开始计算进度
-            let ignoreDist: CGFloat =  60 //self.loadingViewHeight * 0.5 + UITool.statusBarHeight
-            // 参与计算的滑动距离
+            let ignoreDist: CGFloat = pullTriggerThreshold
             let loadingDistance = scrollDistance > ignoreDist ? scrollDistance - ignoreDist : 0
-            // 最大滑动距离
-            let maxDist: CGFloat = 200
             // 计算动画百分比
-            let percent = min(loadingDistance, maxDist) / maxDist
+            let percent = min(loadingDistance, secondFloorhreshold) / secondFloorhreshold
+            
             // 透明度
             let alpha = 1 - percent
+            
+        
             
             if (scrollDistance > pullTriggerThreshold && scrollDistance < refreshThreshold) {
                 refreshView.isHidden = false
                 refreshView.setText(text: "下拉刷新")
+                refreshView.updateProgressWithPercent(0.14)
             } else if (scrollDistance > refreshThreshold && scrollDistance < secondFloorhreshold) {
                 refreshView.isHidden = false
-                refreshView.setText(text: "松手刷新")
+                refreshView.setText(text: "松手刷新，继续下拉进二楼")
+                refreshView.updateProgressWithPercent(percent)
             } else if (scrollDistance > secondFloorhreshold) {
                 refreshView.isHidden = false
-                refreshView.setText(text: "欢迎访问我的频道")
+                refreshView.setText(text: "松手进二楼")
+                refreshView.updateProgressWithPercent(1)
             } else {
                 refreshView.isHidden = true
             }
@@ -172,13 +172,6 @@ extension ViewController: UIScrollViewDelegate {
             print("松手刷新")
         }
     }
-
-    // 即将停止拖动 scrollView 时，滚动是否会减速
-    func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-        // 如果 decelerate 为 false，表示滚动立即停止，不会减速
-        if !decelerate {}
-    }
-
 }
 
 
@@ -200,6 +193,7 @@ extension ViewController {
     /// 进入一楼动画
     func anmationToFirstFloor() {
         print("---------------->回到一楼")
+        self.refreshView.isHidden = true
         self.secondFoorView.dismissViewWithAnimation()
         UIView.animate(withDuration: animationTimeinterval) {
             self.tableView.scrollsToTop = true
@@ -227,3 +221,4 @@ extension ViewController: SecondFloorDidScrollDelegate {
         }
     }
 }
+
