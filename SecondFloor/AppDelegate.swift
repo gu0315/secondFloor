@@ -1,14 +1,16 @@
 //
 //  AppDelegate.swift
-//  WeChat
+//  SecondFloor
 //
-//  Created by 顾钱想 on 2023/6/25.
+//  Created by xc on 2025/7/31.
 //
 
 import UIKit
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
+
+
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
